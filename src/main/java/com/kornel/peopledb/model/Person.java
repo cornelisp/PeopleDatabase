@@ -23,6 +23,12 @@ public class Person {
         this.lastName = lastName;
         this.dob = dob;
     }
+    public Person(Long id,String firstName, String lastName, ZonedDateTime dob) {
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.dob = dob;
+        this.id = id;
+    }
 
     public void setFirstName(String firstName) {
         this.firstName = firstName;
@@ -63,7 +69,7 @@ public class Person {
         if (o == null || getClass() != o.getClass()) return false;
         Person person = (Person) o;
         return Objects.equals(id, person.id) && firstName.equals(person.firstName) && lastName.equals(person.lastName) &&
-                dob.withZoneSameInstant(ZoneId.of("+0")).equals(person.dob.withZoneSameInstant(ZoneId.of("+0")));
+        dob.withZoneSameInstant(ZoneId.of("+0")).equals(person.dob.withZoneSameInstant(ZoneId.of("+0")));
     }
 
     @Override

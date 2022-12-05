@@ -10,6 +10,7 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.util.Optional;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
@@ -48,9 +49,54 @@ public class PeopleRepositoryTest {
     }
     @Test
     public void canFindPersonById() {
-        Person savedPerson = repo.save(new Person("test", "jackson", ZonedDateTime.now()));
-        Person foundPerson = repo.findById(savedPerson.getId());
+        Person savedPerson = repo.save(new Person("test", "jackson", ZonedDateTime.of(1999,12,15,15,15,0,0,ZoneId.of("+0"))));
+        Person foundPerson = repo.findById(savedPerson.getId()).get();
         assertThat(foundPerson).isEqualTo(savedPerson);
 
+    }
+    @Test
+    public void testPersonIdNotFound() {
+        Optional<Person> foundPerson = repo.findById(-1L);
+        assertThat(foundPerson).isEmpty();
+    }
+
+    @Test
+    public void canGetCount() {
+        int startCount = repo.count();
+        repo.save(repo.save(new Person("test1", "jackson", ZonedDateTime.of(1999,12,15,15,15,0,0,ZoneId.of("+0")))));
+        repo.save(repo.save(new Person("test2", "jackson", ZonedDateTime.of(1999,12,15,15,15,0,0,ZoneId.of("+0")))));
+        int endCount = repo.count();
+        assertThat(endCount).isGreaterThan(startCount);
+        System.out.println(endCount + " " + startCount);
+
+    }
+
+    @Test
+    public void canDelete() {
+        Person savedPerson = repo.save(repo.save(new Person("test1", "jackson", ZonedDateTime.of(1999,12,15,15,15,0,0,ZoneId.of("+0")))));
+        int startCount = repo.count();
+        repo.delete(savedPerson);
+        int endCount = repo.count();
+        assertThat(endCount).isEqualTo(startCount-1);
+
+    }
+
+    @Test
+    public void canDeleteMultiplePeople() {
+        Person p1 = repo.save(repo.save(new Person("test1", "jackson", ZonedDateTime.of(1999,12,15,15,15,0,0,ZoneId.of("+0")))));
+        Person p2 = repo.save(repo.save(new Person("test1", "jackson", ZonedDateTime.of(1999,12,15,15,15,0,0,ZoneId.of("+0")))));
+        int start = repo.count();
+        repo.delete(p1,p2);
+        int end = repo.count();
+        assertThat(end).isEqualTo(start-2);
+    }
+
+    @Test
+    public void experiment() {
+        Person p1 = new Person(10L,null,null,null);
+        Person p2 = new Person(20L,null,null,null);
+        Person p3 = new Person(30L,null,null,null);
+        Person p4 = new Person(40L,null,null,null);
+        Person p5 = new Person(50L,null,null,null);
     }
 }

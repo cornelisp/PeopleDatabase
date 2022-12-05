@@ -3,6 +3,7 @@ import com.kornel.peopledb.model.Person;
 import java.sql.*;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.util.Optional;
 
 public class PeopleRepository {
     public static final String SAVE_PERSON_SQL = "INSERT INTO PEOPLE (FIRST_NAME, LAST_NAME, DOB) VALUES(?, ?, ?)";
@@ -31,7 +32,7 @@ public class PeopleRepository {
         return person;
     }
 
-    public Person findById(Long id) {
+    public Optional<Person> findById(Long id) {
         Person person = null;
 
         try {
@@ -51,6 +52,48 @@ public class PeopleRepository {
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        return person;
+        return Optional.ofNullable(person);
+    }
+
+    public int count() {
+        int s=0;
+        try {
+            String sql = "SELECT COUNT(*) FROM PEOPLE";
+            PreparedStatement ps = connection.prepareStatement(sql,ResultSet.TYPE_SCROLL_INSENSITIVE,ResultSet.CONCUR_READ_ONLY);
+            ResultSet rs = ps.executeQuery();
+            rs.next();
+            s = rs.getInt(1);
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return s;
+    }
+
+    public void delete(Person person) {
+        try {
+            PreparedStatement ps = connection.prepareStatement("DELETE FROM PEOPLE WHERE ID=?");
+            ps.setLong(1,person.getId());
+            int affectedRecordsCount = ps.executeUpdate();
+            System.out.println(affectedRecordsCount);
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+//    public void delete(Person...people) {
+//        for (Person person : people) {
+//            delete(person);
+//        }
+//    }
+
+    public void delete(Person...people) {
+        try {
+            Statement stmt = connection.createStatement();
+            stmt.executeUpdate("DELETE FROM PEOPLE WHERE ID IN ");
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
 }
