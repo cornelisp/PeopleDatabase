@@ -26,6 +26,15 @@ This project is a backend CRUD application for managing a database of people. It
 3. Run the Gradle build task
 4. Run the application
 
+## SQL SCRIPT
+
+CREATE TABLE PEOPLE(ID BIGINT AUTO_INCREMENT, FIRST_NAME VARCHAR(255), LAST_NAME VARCHAR(255), DOB TIMESTAMP, SALARY DECIMAL);
+
+INSERT INTO PEOPLE (FIRST_NAME, LAST_NAME, DOB, SALARY) VALUES('Tom','Cruise','1990-03-12 12:12:10',10000.00)
+
+select * from people
+
+
 ## Usage
 
 Once the application is running, you can use the CRUD operations to manage the people in the database. You can also search, sort, and filter the people in the database.
