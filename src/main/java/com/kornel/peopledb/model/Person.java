@@ -1,22 +1,22 @@
 package com.kornel.peopledb.model;
+import com.kornel.peopledb.annotation.Id;
+
+import java.math.BigDecimal;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.Objects;
 
 public class Person {
+    @Id
     private Long id;
     private String firstName;
     private String lastName;
     private ZonedDateTime dob;
+    private BigDecimal salary = new BigDecimal("0");
 
-    @Override
-    public String toString() {
-        return "Person{" +
-                "id=" + id +
-                ", firstName='" + firstName + '\'' +
-                ", lastName='" + lastName + '\'' +
-                ", dob=" + dob +
-                '}';
+    public Person(long id, String firstName, String lastName, ZonedDateTime dob, BigDecimal salary) {
+        this(id,firstName,lastName,dob);
+        this.salary=salary;
     }
     public Person(String firstName, String lastName, ZonedDateTime dob) {
         this.firstName = firstName;
@@ -28,6 +28,16 @@ public class Person {
         this.lastName = lastName;
         this.dob = dob;
         this.id = id;
+    }
+
+    @Override
+    public String toString() {
+        return "Person{" +
+                "id=" + id +
+                ", firstName='" + firstName + '\'' +
+                ", lastName='" + lastName + '\'' +
+                ", dob=" + dob +
+                '}';
     }
 
     public void setFirstName(String firstName) {
@@ -42,6 +52,13 @@ public class Person {
         this.dob = dob;
     }
 
+    public BigDecimal getSalary() {
+        return salary;
+    }
+
+    public void setSalary(BigDecimal salary) {
+        this.salary = salary;
+    }
 
     public String getFirstName() {
         return firstName;

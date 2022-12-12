@@ -1,99 +1,58 @@
 package com.kornel.peopledb.repository;
+
+import com.kornel.peopledb.annotation.SQL;
+import com.kornel.peopledb.model.CrudOperation;
 import com.kornel.peopledb.model.Person;
+import java.math.BigDecimal;
 import java.sql.*;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
-import java.util.Optional;
 
-public class PeopleRepository {
+public class PeopleRepository extends CRUDRepository<Person> {
     public static final String SAVE_PERSON_SQL = "INSERT INTO PEOPLE (FIRST_NAME, LAST_NAME, DOB) VALUES(?, ?, ?)";
-    private final Connection connection;
+    public static final String FIND_PERSON_SQL = "SELECT ID, FIRST_NAME, LAST_NAME, DOB, SALARY FROM PEOPLE WHERE ID=?";
+    public static final String FIND_ALL_SQL = "SELECT ID FIRST_NAME, LAST_NAME, DOB, SALARY FROM PEOPLE";
+    public static final String COUNT_PERSON_SQL = "SELECT COUNT(*) FROM PEOPLE";
+    public static final String DELETE_PERSON_SQL = "DELETE FROM PEOPLE WHERE ID=?";
+    public static final String DELETE_MULTIPLE_SQL = "DELETE FROM PEOPLE WHERE ID IN (:ids)";
+    public static final String UPDATE_PERSON_SQL = "UPDATE PEOPLE SET FIRST_NAME = ?, LAST_NAME = ?, DOB = ?, SALARY = ? WHERE ID = ?";
+
     public PeopleRepository(Connection connection) {
-        this.connection = connection;
+        super(connection);
     }
 
-    public Person save(Person person) {
-        try {
-            PreparedStatement ps = connection.prepareStatement(SAVE_PERSON_SQL, Statement.RETURN_GENERATED_KEYS);
-            ps.setString(1,person.getFirstName());
-            ps.setString(2,person.getLastName());
-            ps.setTimestamp(3, Timestamp.valueOf(person.getDob().withZoneSameInstant(ZoneId.of("+0")).toLocalDateTime()));
-            int recordsAffected = ps.executeUpdate();
-            ResultSet rs = ps.getGeneratedKeys();
-            while (rs.next())   {
-                long id = rs.getLong(1);
-                person.setId(id);
-                System.out.println(person);
-            }
-            System.out.format("Records affected: %d%n",recordsAffected);
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return person;
+    private static Timestamp convertDobToTimestamp(ZonedDateTime dob) {
+        return Timestamp.valueOf(dob.withZoneSameInstant(ZoneId.of("+0")).toLocalDateTime());
     }
 
-    public Optional<Person> findById(Long id) {
-        Person person = null;
-
-        try {
-            String sql = "SELECT ID, FIRST_NAME, LAST_NAME, DOB FROM PEOPLE WHERE ID=?";
-            PreparedStatement ps = connection.prepareStatement(sql);
-            ps.setLong(1,id);
-            ResultSet rs = ps.executeQuery();
-            while(rs.next()) {
-                long personId = rs.getLong("ID");
-                String firstName = rs.getString("FIRST_NAME");
-                String lastName = rs.getString("LAST_NAME");
-                ZonedDateTime dob = ZonedDateTime.of((rs.getTimestamp("DOB")).toLocalDateTime(), ZoneId.of("+0"));
-                person = new Person(firstName,lastName,dob);
-                person.setId(personId);
-
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return Optional.ofNullable(person);
+    @Override
+    @SQL(value = SAVE_PERSON_SQL,operationType = CrudOperation.SAVE)
+    void mapForSave(Person entity, PreparedStatement ps) throws SQLException {
+        ps.setString(1, entity.getFirstName());
+        ps.setString(2, entity.getLastName());
+        ps.setTimestamp(3, convertDobToTimestamp(entity.getDob()));
+    }
+    @Override
+    @SQL(value = UPDATE_PERSON_SQL,operationType = CrudOperation.UPDATE)
+    void mapForUpdate(Person entity, PreparedStatement ps) throws SQLException {
+        ps.setString(1, entity.getFirstName());
+        ps.setString(2, entity.getLastName());
+        ps.setTimestamp(3, convertDobToTimestamp(entity.getDob()));
+        ps.setBigDecimal(4, entity.getSalary());
     }
 
-    public int count() {
-        int s=0;
-        try {
-            String sql = "SELECT COUNT(*) FROM PEOPLE";
-            PreparedStatement ps = connection.prepareStatement(sql,ResultSet.TYPE_SCROLL_INSENSITIVE,ResultSet.CONCUR_READ_ONLY);
-            ResultSet rs = ps.executeQuery();
-            rs.next();
-            s = rs.getInt(1);
-
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return s;
-    }
-
-    public void delete(Person person) {
-        try {
-            PreparedStatement ps = connection.prepareStatement("DELETE FROM PEOPLE WHERE ID=?");
-            ps.setLong(1,person.getId());
-            int affectedRecordsCount = ps.executeUpdate();
-            System.out.println(affectedRecordsCount);
-
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-    }
-
-//    public void delete(Person...people) {
-//        for (Person person : people) {
-//            delete(person);
-//        }
-//    }
-
-    public void delete(Person...people) {
-        try {
-            Statement stmt = connection.createStatement();
-            stmt.executeUpdate("DELETE FROM PEOPLE WHERE ID IN ");
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
+    @Override
+    @SQL(value = FIND_PERSON_SQL,operationType = CrudOperation.FIND_BY_ID)
+    @SQL(value = FIND_ALL_SQL,operationType = CrudOperation.FIND_ALL)
+    @SQL(value = COUNT_PERSON_SQL, operationType = CrudOperation.COUNT)
+    @SQL(value = DELETE_PERSON_SQL,operationType = CrudOperation.DELETE)
+    @SQL(value = DELETE_MULTIPLE_SQL,operationType = CrudOperation.DELETE_ALL)
+    Person extractEntityFromResultSet(ResultSet rs) throws SQLException {
+        long personId = rs.getLong("ID");
+        String firstName = rs.getString("FIRST_NAME");
+        String lastName = rs.getString("LAST_NAME");
+        ZonedDateTime dob = ZonedDateTime.of(rs.getTimestamp("DOB").toLocalDateTime(),ZoneId.of("+0"));
+        BigDecimal salary = rs.getBigDecimal("SALARY");
+        return new Person(personId,firstName,lastName,dob, salary);
     }
 }
