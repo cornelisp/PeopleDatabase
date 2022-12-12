@@ -4,9 +4,9 @@ This project is a backend CRUD application for managing a database of people. It
 
 ## Features
 
-* Create, read, update, and delete (CRUD) operations for people in the database
-* Ability to search for people by id or other condition.
-* Ability to delete multiple people at once.
+- Create, read, update, and delete (CRUD) operations for people in the database
+- Ability to search for people by id or other condition.
+- Ability to delete multiple people at once.
 
 
 ## Requirements
@@ -39,7 +39,7 @@ select * from PEOPLE
 
 ## Usage
 
-Once the application is running, you can use the CRUD operations to manage the people in the database. You can also search, sort, and filter the people in the database.
+Once everything is running, you can use the CRUD operations to manage the people in the database. I suggest testing functionality with tests before running the program, then you can use available operations such as finding by id, deleting multiple people, counting and more.
 
 ## Contributing
 
