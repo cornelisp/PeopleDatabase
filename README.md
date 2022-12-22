@@ -1,4 +1,4 @@
-# People Database Project
+# People Database Web 
 
 This project is a backend CRUD application for managing a database of people. It is written in Java and uses JUnit, JDBC, SQL, H2 Database, Intellij IDE, and Gradle as the build tool.
 
@@ -9,14 +9,13 @@ This project is a backend CRUD application for managing a database of people. It
 - Ability to delete multiple people at once.
 
 
-## Requirements
+## Technologies
 
-* Java 8 or higher
-* JUnit 4 or higher
+* Java 
+* JUnit 
 * JDBC
 * SQL
 * H2 Database
-* Intellij IDE
 * Gradle
 
 ## Installation
